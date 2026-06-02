@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="JobQueue.API/JobQueue.API.csproj" />
+  <Project Path="JobQueue.Application/JobQueue.Application.csproj" />
+  <Project Path="JobQueue.Core/JobQueue.Core.csproj" />
+  <Project Path="JobQueue.Infrastructure/JobQueue.Infrastructure.csproj" />
+  <Project Path="JobQueue.Worker/JobQueue.Worker.csproj" />
+</Solution>

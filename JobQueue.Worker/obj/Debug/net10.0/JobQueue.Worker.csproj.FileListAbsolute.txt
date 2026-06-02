@@ -1,0 +1,11 @@
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/bin/Debug/net10.0/JobQueue.Worker.deps.json
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/bin/Debug/net10.0/JobQueue.Worker.dll
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/bin/Debug/net10.0/JobQueue.Worker.pdb
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/JobQueue.Worker.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/JobQueue.Worker.AssemblyInfoInputs.cache
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/JobQueue.Worker.AssemblyInfo.cs
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/JobQueue.Worker.csproj.CoreCompileInputs.cache
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/JobQueue.Worker.dll
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/refint/JobQueue.Worker.dll
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/JobQueue.Worker.pdb
+/Users/ashithprakas/Development/JobQueue/JobQueue.Worker/obj/Debug/net10.0/ref/JobQueue.Worker.dll
