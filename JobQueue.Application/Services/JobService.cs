@@ -1,8 +1,47 @@
+using JobQueue.Core.Enums;
 using JobQueue.Core.interfaces;
+using JobQueue.Core.Models;
+using JobQueue.Core.Exceptions;
 
 namespace JobQueue.application.Services;
 
-public class JobService : IJobService
+public class JobService(IJobRepository jobRepository) : IJobService
 {
-    
+    public async Task<Job> CreateJob(string payload)
+    {
+        var job = new Job()
+        {
+            Payload = payload,
+            Status = JobStatus.Pending,
+            CreatedAt = DateTime.UtcNow,
+            Attempts = 0
+        };
+        await jobRepository.AddAsync(job);
+        return job;
+    }
+
+    public async Task<JobStatus> GetJobStatus(Guid id)
+    {
+        var job = await jobRepository.GetJobByIdAsync(id);
+        return job?.Status ?? throw new NotFoundException($"Job with id {id} not found");
+    }
+
+    public async Task ProcessJob(Guid id)
+    {
+        var job = await jobRepository.GetJobByIdAsync(id);
+        if (job == null)
+        {
+            throw new NotFoundException($"Job with id {id} not found");
+        }
+        job.Status = JobStatus.Processing;
+        job.UpdatedAt = DateTime.UtcNow;
+        job.Attempts +=1;
+        await jobRepository.UpdateAsync(job);
+
+        await Task.Delay(1000);
+        
+        job.Status = JobStatus.Completed;
+        job.UpdatedAt = DateTime.UtcNow;
+        await jobRepository.UpdateAsync(job);
+    }
 }
