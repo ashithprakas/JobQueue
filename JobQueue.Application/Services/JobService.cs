@@ -14,6 +14,7 @@ public class JobService(IJobRepository jobRepository) : IJobService
             Payload = payload,
             Status = JobStatus.Pending,
             CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
             Attempts = 0
         };
         await jobRepository.AddAsync(job);
