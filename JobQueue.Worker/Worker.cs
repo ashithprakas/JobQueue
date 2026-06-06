@@ -20,7 +20,7 @@ public class Worker(IServiceScopeFactory scopeFactory) : BackgroundService
                 await jobService.ProcessJob(job.Id);
                 
             }
-            await Task.Delay(30000, stoppingToken);
+            await Task.Delay(5000, stoppingToken);
         }
     }
 }

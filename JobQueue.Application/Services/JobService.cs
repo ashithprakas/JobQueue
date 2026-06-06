@@ -1,3 +1,4 @@
+using JobQueue.Core.Constants;
 using JobQueue.Core.Enums;
 using JobQueue.Core.interfaces;
 using JobQueue.Core.Models;
@@ -37,13 +38,22 @@ public class JobService(IJobRepository jobRepository) : IJobService
         job.Status = JobStatus.Processing;
         job.UpdatedAt = DateTime.UtcNow;
         job.Attempts +=1;
-        await jobRepository.UpdateAsync(job);
+        try
+        {
+            await jobRepository.UpdateAsync(job);
+            
+    
+            job.Status = JobStatus.Completed;
+            job.UpdatedAt = DateTime.UtcNow;
+            await jobRepository.UpdateAsync(job);
+        }
+        catch (Exception e)
+        {
+            job.Status = job.Attempts >= JobConstants.MaxAttempts ? JobStatus.DeadLetter : JobStatus.Pending;
+            job.UpdatedAt = DateTime.UtcNow;
+            await jobRepository.UpdateAsync(job);
+        }
 
-        await Task.Delay(30000);
-        
-        job.Status = JobStatus.Completed;
-        job.UpdatedAt = DateTime.UtcNow;
-        await jobRepository.UpdateAsync(job);
     }
     
     public async Task<List<Job>> GetPendingJobs()
