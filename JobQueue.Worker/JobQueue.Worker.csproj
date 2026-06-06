@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\JobQueue.API\JobQueue.API.csproj" />
       <ProjectReference Include="..\JobQueue.Application\JobQueue.Application.csproj" />
       <ProjectReference Include="..\JobQueue.Core\JobQueue.Core.csproj" />
       <ProjectReference Include="..\JobQueue.Infrastructure\JobQueue.Infrastructure.csproj" />

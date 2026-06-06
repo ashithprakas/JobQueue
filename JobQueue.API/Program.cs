@@ -1,4 +1,3 @@
-using JobQueue.API.DTOs;
 using JobQueue.application.Services;
 using JobQueue.Core.interfaces;
 using JobQueue.Infrastructure;
@@ -6,6 +5,7 @@ using JobQueue.infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using JobQueue.API.Endpoints;
 using System.Text.Json.Serialization;
+using JobQueue.API.Services;
 using JobQueue.Core.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -20,11 +20,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddSingleton<IJobNotificationService, JobNotificationService>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("null", "http://localhost", "http://127.0.0.1:5500")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,7 +63,8 @@ app.UseExceptionHandler(errorApp =>
 });
 app.UseHttpsRedirection();
 app.MapJobEndpoints();
-
+app.UseCors();
+app.MapSignalREndpoints();
 app.Run();
 
 

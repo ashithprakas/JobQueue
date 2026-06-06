@@ -6,7 +6,7 @@ using JobQueue.Core.Exceptions;
 
 namespace JobQueue.application.Services;
 
-public class JobService(IJobRepository jobRepository) : IJobService
+public class JobService(IJobRepository jobRepository , IJobNotificationService jobNotificationService) : IJobService
 {
     public async Task<Job> CreateJob(string payload)
     {
@@ -20,7 +20,7 @@ public class JobService(IJobRepository jobRepository) : IJobService
         };
         await jobRepository.AddAsync(job);
         return job;
-    }
+    } 
 
     public async Task<JobStatus> GetJobStatus(Guid id)
     {
@@ -41,7 +41,7 @@ public class JobService(IJobRepository jobRepository) : IJobService
         try
         {
             await jobRepository.UpdateAsync(job);
-            
+            await jobNotificationService.NotifyJobStatusChange(job.Id, job.Status);
     
             job.Status = JobStatus.Completed;
             job.UpdatedAt = DateTime.UtcNow;
@@ -53,7 +53,7 @@ public class JobService(IJobRepository jobRepository) : IJobService
             job.UpdatedAt = DateTime.UtcNow;
             await jobRepository.UpdateAsync(job);
         }
-
+        await jobNotificationService.NotifyJobStatusChange(job.Id, job.Status);
     }
     
     public async Task<List<Job>> GetPendingJobs()
