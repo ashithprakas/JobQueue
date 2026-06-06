@@ -39,10 +39,16 @@ public class JobService(IJobRepository jobRepository) : IJobService
         job.Attempts +=1;
         await jobRepository.UpdateAsync(job);
 
-        await Task.Delay(1000);
+        await Task.Delay(30000);
         
         job.Status = JobStatus.Completed;
         job.UpdatedAt = DateTime.UtcNow;
         await jobRepository.UpdateAsync(job);
+    }
+    
+    public async Task<List<Job>> GetPendingJobs()
+    {
+        var job = await jobRepository.GetPendingJobsAsync();
+        return job;
     }
 }
