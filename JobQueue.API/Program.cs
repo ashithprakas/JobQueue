@@ -7,7 +7,9 @@ using JobQueue.API.Endpoints;
 using System.Text.Json.Serialization;
 using JobQueue.API.Services;
 using JobQueue.Core.Exceptions;
+using JobQueue.Infrastructure.Messaging;
 using Microsoft.AspNetCore.Diagnostics;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +22,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
-builder.Services.AddSingleton<IJobNotificationService, JobNotificationService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379"));
+builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
+builder.Services.AddHostedService<RedisSubscriberService>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
