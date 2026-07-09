@@ -1,4 +1,4 @@
-using JobQueue.Core.interfaces;
+using JobQueue.Core.Interfaces;
 
 namespace JobQueue.Worker;
 

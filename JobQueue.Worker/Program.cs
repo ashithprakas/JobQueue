@@ -1,6 +1,6 @@
-using JobQueue.application.Services;
-using JobQueue.Core.interfaces;
-using JobQueue.infrastructure.Repositories;
+using JobQueue.Application.Services;
+using JobQueue.Core.Interfaces;
+using JobQueue.Infrastructure.Repositories;
 using JobQueue.Infrastructure;
 using JobQueue.Infrastructure.Messaging;
 using JobQueue.Worker;
