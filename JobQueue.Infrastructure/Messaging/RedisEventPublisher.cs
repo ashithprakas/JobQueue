@@ -1,5 +1,5 @@
 using JobQueue.Core.Enums;
-using JobQueue.Core.interfaces;
+using JobQueue.Core.Interfaces;
 using StackExchange.Redis;
 
 namespace JobQueue.Infrastructure.Messaging;

@@ -3,9 +3,9 @@ using JobQueue.Core.Models;
 using JobQueue.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace JobQueue.infrastructure.Repositories;
+namespace JobQueue.Infrastructure.Repositories;
 
-using JobQueue.Core.interfaces;
+using Core.Interfaces;
 
 public class JobRepository(AppDbContext appDbContext) : IJobRepository 
 {

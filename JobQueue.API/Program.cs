@@ -1,7 +1,7 @@
-using JobQueue.application.Services;
-using JobQueue.Core.interfaces;
+using JobQueue.Application.Services;
+using JobQueue.Core.Interfaces;
 using JobQueue.Infrastructure;
-using JobQueue.infrastructure.Repositories;
+using JobQueue.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using JobQueue.API.Endpoints;
 using System.Text.Json.Serialization;

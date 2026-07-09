@@ -1,7 +1,7 @@
 using JobQueue.Core.Enums;
 using JobQueue.Core.Models;
 
-namespace JobQueue.Core.interfaces;
+namespace JobQueue.Core.Interfaces;
 
 public interface IJobService
 {

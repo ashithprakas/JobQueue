@@ -1,6 +1,6 @@
 using JobQueue.Core.Enums;
 
-namespace JobQueue.Core.interfaces;
+namespace JobQueue.Core.Interfaces;
 
 public interface IEventPublisher
 {

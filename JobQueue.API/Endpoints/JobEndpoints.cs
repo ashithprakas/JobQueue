@@ -1,5 +1,5 @@
 using JobQueue.API.DTOs;
-using JobQueue.Core.interfaces;
+using JobQueue.Core.Interfaces;
 
 namespace JobQueue.API.Endpoints;
 

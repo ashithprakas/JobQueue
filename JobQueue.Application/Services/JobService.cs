@@ -1,10 +1,10 @@
 using JobQueue.Core.Constants;
 using JobQueue.Core.Enums;
-using JobQueue.Core.interfaces;
+using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
 using JobQueue.Core.Exceptions;
 
-namespace JobQueue.application.Services;
+namespace JobQueue.Application.Services;
 
 public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher) : IJobService
 {
@@ -51,6 +51,7 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
         {
             job.Status = job.Attempts >= JobConstants.MaxAttempts ? JobStatus.DeadLetter : JobStatus.Pending;
             job.UpdatedAt = DateTime.UtcNow;
+            job.ErrorMessage = e.Message;
             await jobRepository.UpdateAsync(job);
         }
         await eventPublisher.PublishJobStatusUpdate(job.Id, job.Status);
