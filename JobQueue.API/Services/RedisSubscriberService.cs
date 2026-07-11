@@ -9,18 +9,32 @@ public class RedisSubscriberService(IConnectionMultiplexer redis,IHubContext<Job
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var subscriber = redis.GetSubscriber();
-
-        await subscriber.SubscribeAsync("job-status", async (channel, message) =>
+        while (!stoppingToken.IsCancellationRequested)
         {
-            var parts = message.ToString().Split(':');
-            if (parts.Length == 2)
+            try
             {
-                var jobId = parts[0];
-                var status = parts[1];
+                await subscriber.SubscribeAsync("job-status", async (channel, message) =>
+                {
+                    var parts = message.ToString().Split(':');
+                    if (parts.Length == 2)
+                    {
+                        var jobId = parts[0];
+                        var status = parts[1];
 
-                await hubContext.Clients.All.SendAsync("JobStatusChanged", jobId, status);
+                        await hubContext.Clients.All.SendAsync("JobStatusChanged", jobId, status);
+                    }
+                });
+                Console.WriteLine("Connected to Redis");
+                break;
             }
-        });
-            await Task.Delay(Timeout.Infinite,stoppingToken);
+            catch (Exception e)
+            {
+                Console.WriteLine("Error subscribing to redis :" + e.Message);
+                Console.WriteLine("Retrying in 5 seconds...");
+                await Task.Delay(500, stoppingToken);
+            }
+
+        }
+        await Task.Delay(Timeout.Infinite,stoppingToken);
     }
 }

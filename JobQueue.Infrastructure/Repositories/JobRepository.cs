@@ -22,7 +22,7 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
 
     public async Task<List<Job>> GetPendingJobsAsync()
     {
-        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).ToListAsync();
+        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).Where(job=>job.RetryAt==null || job.RetryAt<DateTime.UtcNow).ToListAsync();
     }
 
     public async Task UpdateAsync(Job job)
@@ -34,7 +34,8 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
                  .SetProperty(u=>u.Attempts,job.Attempts)
                  .SetProperty(u=>u.UpdatedAt,job.UpdatedAt)
                  .SetProperty(u=>u.ErrorMessage,job.ErrorMessage)
-                 .SetProperty(u=>u.Payload,job.Payload));
+                 .SetProperty(u=>u.Payload,job.Payload)
+                 .SetProperty(u=>u.RetryAt,job.RetryAt));
     }
     
 }

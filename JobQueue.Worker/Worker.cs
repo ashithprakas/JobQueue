@@ -17,6 +17,7 @@ public class Worker(IServiceScopeFactory scopeFactory) : BackgroundService
             foreach (var job in jobList)
             {
                 Console.WriteLine("ExecutingJob: " + job.Id);
+                
                 await jobService.ProcessJob(job.Id);
                 
             }

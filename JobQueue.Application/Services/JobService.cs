@@ -51,10 +51,32 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
         {
             job.Status = job.Attempts >= JobConstants.MaxAttempts ? JobStatus.DeadLetter : JobStatus.Pending;
             job.UpdatedAt = DateTime.UtcNow;
+            job.RetryAt = DateTime.UtcNow + new TimeSpan(0,5,Random.Shared.Next(0, 60)) ;
             job.ErrorMessage = e.Message;
-            await jobRepository.UpdateAsync(job);
+            try
+            {
+                await jobRepository.UpdateAsync(job);
+            }
+            catch (Exception dbEx)
+            {
+                // Could not persist the failure itself (e.g. SQL Server unreachable). The job is
+                // now stuck at Status = Processing with no recorded error and no RetryAt saved —
+                // GetPendingJobsAsync only fetches Status == Pending, so it will never be picked
+                // up again on its own. Logged loudly on purpose: this means a job is lost, not
+                // just "an error happened." Full recovery for this case is out of scope for now
+                // (see Task 18 — outbox pattern / dead-letter reprocessing).
+                Console.WriteLine($"CRITICAL: failed to persist failure state for job {job.Id} — job is now stuck at Processing. Original error: {e.Message}. Persistence error: {dbEx.Message}");
+            }
         }
-        await eventPublisher.PublishJobStatusUpdate(job.Id, job.Status);
+
+        try
+        {
+            await eventPublisher.PublishJobStatusUpdate(job.Id, job.Status);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Redis not working : Error - " + e.Message);
+        }
     }
     
     public async Task<List<Job>> GetPendingJobs()

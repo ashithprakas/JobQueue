@@ -22,8 +22,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
-builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect("localhost:6379"));
+var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
+multiplexerOptions.AbortOnConnectFail = false;
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(multiplexerOptions));
 builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
 builder.Services.AddHostedService<RedisSubscriberService>();
 builder.Services.ConfigureHttpJsonOptions(options =>
