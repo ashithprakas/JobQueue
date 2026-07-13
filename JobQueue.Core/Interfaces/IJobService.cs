@@ -8,5 +8,4 @@ public interface IJobService
     Task<Job> CreateJob(string payload);
     Task<JobStatus> GetJobStatus(Guid id);
     Task ProcessJob(Guid id);
-    Task<List<Job>> GetPendingJobs();
 }

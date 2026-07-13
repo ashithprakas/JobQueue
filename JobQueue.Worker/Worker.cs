@@ -1,4 +1,6 @@
 using JobQueue.Core.Interfaces;
+using JobQueue.Core.Models;
+using StackExchange.Redis;
 
 namespace JobQueue.Worker;
 
@@ -9,12 +11,22 @@ public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStre
     {
         await jobStreamService.EnsureConsumerGroupAsync();
         var consumerName = Environment.MachineName + "_" + Guid.NewGuid();
+        List<StreamJobEntry> jobStream;
         while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = scopeFactory.CreateScope();
             var jobService = scope.ServiceProvider.GetRequiredService<IJobService>();
-            var jobList = await jobStreamService.ReadJobsAsync(consumerName, 5);
-            foreach (var job in jobList)
+            try
+            {
+                jobStream = await jobStreamService.ReadJobsAsync(consumerName, 5);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Failed to read from job stream, Will restart in 5 seconds : "+ex.Message);
+                await Task.Delay(5000, stoppingToken);
+                continue;
+            }
+            foreach (var job in jobStream)
             {
                 await jobService.ProcessJob(job.JobId);
                 await jobStreamService.AcknowledgeAsync(job.EntryId);

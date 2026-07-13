@@ -1,6 +1,5 @@
 using JobQueue.Core.Enums;
 using JobQueue.Core.Models;
-using JobQueue.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobQueue.Infrastructure.Repositories;
@@ -19,11 +18,7 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
     { 
         return await appDbContext.Jobs.Where(job => job.Id == id ).FirstOrDefaultAsync();
     }
-
-    public async Task<List<Job>> GetPendingJobsAsync()
-    {
-        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).Where(job=>job.RetryAt==null || job.RetryAt<DateTime.UtcNow).ToListAsync();
-    }
+    
 
     public async Task UpdateAsync(Job job)
     {
@@ -37,5 +32,9 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
                  .SetProperty(u=>u.Payload,job.Payload)
                  .SetProperty(u=>u.RetryAt,job.RetryAt));
     }
-    
+
+    public async Task<List<Job>> GetJobsToRetryAsync()
+    {
+        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).Where(job=> job.RetryAt<DateTime.UtcNow).ToListAsync();
+    }
 }

@@ -79,10 +79,4 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
             Console.WriteLine("Redis not working : Error - " + e.Message);
         }
     }
-    
-    public async Task<List<Job>> GetPendingJobs()
-    {
-        var job = await jobRepository.GetPendingJobsAsync();
-        return job;
-    }
 }
