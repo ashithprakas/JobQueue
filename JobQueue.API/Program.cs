@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using JobQueue.API.Services;
 using JobQueue.Core.Exceptions;
 using JobQueue.Infrastructure.Messaging;
+using JobQueue.Infrastructure.RedisRepository;
 using Microsoft.AspNetCore.Diagnostics;
 using StackExchange.Redis;
 
@@ -25,6 +26,7 @@ builder.Services.AddScoped<IJobService, JobService>();
 var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
 multiplexerOptions.AbortOnConnectFail = false;
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(multiplexerOptions));
+builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
 builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
 builder.Services.AddHostedService<RedisSubscriberService>();
 builder.Services.ConfigureHttpJsonOptions(options =>

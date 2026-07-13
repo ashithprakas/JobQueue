@@ -6,7 +6,7 @@ using JobQueue.Core.Exceptions;
 
 namespace JobQueue.Application.Services;
 
-public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher) : IJobService
+public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher, IJobStreamService redisRepository) : IJobService
 {
     public async Task<Job> CreateJob(string payload)
     {
@@ -19,6 +19,7 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
             Attempts = 0
         };
         await jobRepository.AddAsync(job);
+        await redisRepository.AddJobToQueueAsync(job.Id.ToString());
         return job;
     } 
 
