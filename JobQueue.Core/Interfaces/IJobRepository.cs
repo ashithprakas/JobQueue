@@ -8,5 +8,5 @@ public interface IJobRepository
     Task AddAsync(Job job);
     Task<Job?> GetJobByIdAsync(Guid id);
     Task UpdateAsync(Job job);
-    Task<List<Job>>GetJobsToRetryAsync();
+    Task<List<Job>>GetJobsToRetryAsync(int count=1);
 }

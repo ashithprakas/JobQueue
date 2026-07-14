@@ -5,6 +5,8 @@ using JobQueue.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using JobQueue.API.Endpoints;
 using System.Text.Json.Serialization;
+using FluentValidation;
+using JobQueue.API.DTOs;
 using JobQueue.API.Services;
 using JobQueue.Core.Exceptions;
 using JobQueue.Infrastructure.Messaging;
@@ -28,6 +30,8 @@ multiplexerOptions.AbortOnConnectFail = false;
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(multiplexerOptions));
 builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
 builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateJobRequestValidator>();
 builder.Services.AddHostedService<RedisSubscriberService>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {

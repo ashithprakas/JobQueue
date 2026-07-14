@@ -1,3 +1,4 @@
+using JobQueue.Core.Constants;
 using JobQueue.Core.Interfaces;
 
 namespace JobQueue.RetrySweepWorker;
@@ -11,7 +12,7 @@ public class RetrySweepWorker(IServiceScopeFactory scopeFactory,IJobStreamServic
             using var scope = scopeFactory.CreateScope();
             var jobRepository = scope.ServiceProvider.GetRequiredService<IJobRepository>();
 
-            var eligibleJobs = await jobRepository.GetJobsToRetryAsync();
+            var eligibleJobs = await jobRepository.GetJobsToRetryAsync(JobConstants.JobProcessCount);
 
             foreach (var job in eligibleJobs)
             {

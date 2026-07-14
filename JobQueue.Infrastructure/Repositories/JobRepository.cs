@@ -33,8 +33,8 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
                  .SetProperty(u=>u.RetryAt,job.RetryAt));
     }
 
-    public async Task<List<Job>> GetJobsToRetryAsync()
+    public async Task<List<Job>> GetJobsToRetryAsync(int count = 1)
     {
-        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).Where(job=> job.RetryAt<DateTime.UtcNow).ToListAsync();
+        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).Where(job=> job.RetryAt<DateTime.UtcNow).Take(count).ToListAsync();
     }
 }

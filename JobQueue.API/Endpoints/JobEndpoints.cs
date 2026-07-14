@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using JobQueue.API.DTOs;
 using JobQueue.Core.Interfaces;
 using Microsoft.Data.SqlClient;
@@ -10,9 +12,13 @@ public static class JobEndpoints
      public static void MapJobEndpoints(this WebApplication app)
     {
         app.MapGet("/health", ()=>Results.Ok("Healthy"));
-        app.MapPost("/jobs", async (CreateJobRequest createJobRequest, IJobService jobService) =>
+        app.MapPost("/jobs", async (CreateJobRequest createJobRequest, IJobService jobService,IValidator<CreateJobRequest> validator) =>
         {
-            if(createJobRequest.Id == Guid.Empty)return Results.BadRequest("Id cannot be empty");
+            var validationResult = await validator.ValidateAsync(createJobRequest);
+            if (!validationResult.IsValid)
+            {
+                return Results.ValidationProblem(validationResult.ToDictionary());
+            }
             try
             {
                 var job = await jobService.CreateJob(createJobRequest.Id, createJobRequest.Payload);

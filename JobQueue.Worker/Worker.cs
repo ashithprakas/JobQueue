@@ -1,3 +1,4 @@
+using JobQueue.Core.Constants;
 using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
 using StackExchange.Redis;
@@ -18,7 +19,7 @@ public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStre
             var jobService = scope.ServiceProvider.GetRequiredService<IJobService>();
             try
             {
-                jobStream = await jobStreamService.ReadJobsAsync(consumerName, 5);
+                jobStream = await jobStreamService.ReadJobsAsync(consumerName, JobConstants.JobProcessCount);
             }
             catch(Exception ex)
             {
