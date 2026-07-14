@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using JobQueue.Core.Enums;
 
 namespace JobQueue.Core.Models;
