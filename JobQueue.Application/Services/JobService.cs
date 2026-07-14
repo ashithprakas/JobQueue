@@ -8,16 +8,18 @@ namespace JobQueue.Application.Services;
 
 public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher, IJobStreamService redisRepository) : IJobService
 {
-    public async Task<Job> CreateJob(string payload)
+    public async Task<Job> CreateJob(Guid Id,string payload)
     {
         var job = new Job()
         {
+            Id = Id,
             Payload = payload,
             Status = JobStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Attempts = 0
         };
+        
         await jobRepository.AddAsync(job);
         await redisRepository.AddJobToQueueAsync(job.Id.ToString());
         return job;
@@ -78,5 +80,10 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
         {
             Console.WriteLine("Redis not working : Error - " + e.Message);
         }
+    }
+
+    public async Task<Job> GetJobById(Guid id)
+    {
+        return await jobRepository.GetJobByIdAsync(id);
     }
 }

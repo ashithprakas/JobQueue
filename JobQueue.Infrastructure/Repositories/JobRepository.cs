@@ -16,7 +16,7 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
 
     public async Task<Job?> GetJobByIdAsync(Guid id)
     { 
-        return await appDbContext.Jobs.Where(job => job.Id == id ).FirstOrDefaultAsync();
+        return await appDbContext.Jobs.Where(job => job.Id == id ).AsNoTracking().FirstOrDefaultAsync();
     }
     
 

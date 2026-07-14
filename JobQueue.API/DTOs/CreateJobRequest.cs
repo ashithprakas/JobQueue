@@ -1,3 +1,3 @@
 namespace JobQueue.API.DTOs;
 
-public record CreateJobRequest(string Payload);
+public record CreateJobRequest(Guid Id ,string Payload);
