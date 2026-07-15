@@ -5,4 +5,5 @@
   <Project Path="JobQueue.Infrastructure/JobQueue.Infrastructure.csproj" />
   <Project Path="JobQueue.RetrySweepWorker/JobQueue.RetrySweepWorker.csproj" />
   <Project Path="JobQueue.Worker\JobQueue.Worker.csproj" />
+  <Project Path="JobQueue.Application.Tests/JobQueue.Application.Tests.csproj" />
 </Solution>
