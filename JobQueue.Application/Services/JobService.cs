@@ -62,6 +62,12 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
             }
             catch (Exception dbEx)
             {
+                // Could not persist the failure itself (e.g. SQL Server unreachable). The job is
+                // now stuck at Status = Processing with no recorded error and no RetryAt saved —
+                // GetPendingJobsAsync only fetches Status == Pending, so it will never be picked
+                // up again on its own. Logged loudly on purpose: this means a job is lost, not
+                // just "an error happened." Full recovery for this case is out of scope for now
+                // (see Task 18 — outbox pattern / dead-letter reprocessing).
                 Console.WriteLine($"CRITICAL: failed to persist failure state for job {job.Id} — job is now stuck at Processing. Original error: {e.Message}. Persistence error: {dbEx.Message}");
             }
         }
