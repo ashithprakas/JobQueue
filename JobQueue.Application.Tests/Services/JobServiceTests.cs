@@ -3,6 +3,7 @@ using JobQueue.Core.Enums;
 using JobQueue.Core.Exceptions;
 using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace JobQueue.Application.Tests.Services;
@@ -12,11 +13,12 @@ public class JobServiceTests
     private readonly Mock<IJobStreamService> _jobStreamService = new();
     private readonly Mock<IEventPublisher> _eventPublisher = new();
     private readonly Mock<IJobRepository> _jobRepository = new();
+    private readonly Mock<ILogger<IJobService>> _logger = new();
     private readonly JobService _sut;
 
     public JobServiceTests()
     {
-        _sut = new JobService(_jobRepository.Object, _eventPublisher.Object, _jobStreamService.Object);
+        _sut = new JobService(_jobRepository.Object, _eventPublisher.Object, _jobStreamService.Object, _logger.Object);
     }
 
     [Fact]

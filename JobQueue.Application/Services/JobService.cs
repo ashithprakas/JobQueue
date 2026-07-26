@@ -3,10 +3,11 @@ using JobQueue.Core.Enums;
 using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
 using JobQueue.Core.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace JobQueue.Application.Services;
 
-public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher, IJobStreamService redisRepository) : IJobService
+public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher, IJobStreamService redisRepository,ILogger<IJobService> logger) : IJobService
 {
     public async Task<Job> CreateJob(Guid Id,string payload)
     {
@@ -68,7 +69,7 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
                 // up again on its own. Logged loudly on purpose: this means a job is lost, not
                 // just "an error happened." Full recovery for this case is out of scope for now
                 // (see Task 18 — outbox pattern / dead-letter reprocessing).
-                Console.WriteLine($"CRITICAL: failed to persist failure state for job {job.Id} — job is now stuck at Processing. Original error: {e.Message}. Persistence error: {dbEx.Message}");
+                logger.LogCritical(dbEx, "Failed to persist failure state for job {JobId} — job is now stuck at Processing. Original error: {OriginalError}", job.Id, e.Message);
             }
         }
 
@@ -78,7 +79,7 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
         }
         catch (Exception e)
         {
-            Console.WriteLine("Redis not working : Error - " + e.Message);
+            logger.LogError(e, "Redis not working");
         }
     }
 

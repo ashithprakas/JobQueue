@@ -12,30 +12,40 @@ using JobQueue.Core.Exceptions;
 using JobQueue.Infrastructure.Messaging;
 using JobQueue.Infrastructure.RedisRepository;
 using Microsoft.AspNetCore.Diagnostics;
+using Serilog;
 using StackExchange.Redis;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File("Logs/api-logs.txt", outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
+
 var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
 multiplexerOptions.AbortOnConnectFail = false;
-builder.Services.AddSingleton<IConnectionMultiplexer>(_=>ConnectionMultiplexer.Connect(multiplexerOptions));
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(multiplexerOptions));
 builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
 builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateJobRequestValidator>();
 builder.Services.AddHostedService<RedisSubscriberService>();
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -46,10 +56,12 @@ builder.Services.AddCors(options =>
         .AllowCredentials();
     });
 });
+
 builder.Services.AddSignalR();
+builder.Services.AddSerilog();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -60,7 +72,6 @@ app.UseExceptionHandler(errorApp =>
     errorApp.Run(async context =>
     {
         var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-
         var (statusCode, message) = exception switch
         {
             NotFoundException ex => (404, ex.Message),
@@ -72,11 +83,15 @@ app.UseExceptionHandler(errorApp =>
         await context.Response.WriteAsJsonAsync(new { error = message });
     });
 });
+
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
+
 app.MapJobEndpoints();
+
 app.UseCors();
 app.MapSignalREndpoints();
+
 app.Run();
 
 public partial class Program {}
-

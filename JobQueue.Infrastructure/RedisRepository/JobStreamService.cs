@@ -1,11 +1,12 @@
 using JobQueue.Core.Constants;
 using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace JobQueue.Infrastructure.RedisRepository;
 
-public class JobStreamService(IConnectionMultiplexer redis) : IJobStreamService
+public class JobStreamService(IConnectionMultiplexer redis,ILogger<IJobStreamService> logger) : IJobStreamService
 {
     public Task AddJobToQueueAsync(string id)
     {
@@ -22,11 +23,11 @@ public class JobStreamService(IConnectionMultiplexer redis) : IJobStreamService
         }
         catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
         {
-            Console.WriteLine("Consumer group already exists");
+            logger.LogError(ex, "Consumer group already exists");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            logger.LogError(ex, "Error in EnsureConsumerGroupAsync");
         }
     }
 

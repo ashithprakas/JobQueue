@@ -4,7 +4,7 @@ using StackExchange.Redis;
 
 namespace JobQueue.API.Services;
 
-public class RedisSubscriberService(IConnectionMultiplexer redis,IHubContext<JobStatusHub> hubContext) : BackgroundService
+public class RedisSubscriberService(IConnectionMultiplexer redis,IHubContext<JobStatusHub> hubContext,ILogger<RedisSubscriberService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -24,14 +24,14 @@ public class RedisSubscriberService(IConnectionMultiplexer redis,IHubContext<Job
                         await hubContext.Clients.All.SendAsync("JobStatusChanged", jobId, status);
                     }
                 });
-                Console.WriteLine("Connected to Redis");
+                logger.LogInformation("Connected to Redis");
                 break;
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error subscribing to redis :" + e.Message);
-                Console.WriteLine("Retrying in 5 seconds...");
-                await Task.Delay(500, stoppingToken);
+                logger.LogError(e,"Error subscribing to redis :" );
+                logger.LogInformation("Retrying in 5 seconds...");
+                await Task.Delay(5000, stoppingToken);
             }
 
         }

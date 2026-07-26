@@ -6,8 +6,10 @@ using JobQueue.Infrastructure.Messaging;
 using JobQueue.Infrastructure.RedisRepository;
 using JobQueue.Worker;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using StackExchange.Redis;
 
+Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning).Enrich.FromLogContext().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").WriteTo.File("Logs/worker-logs.txt",outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").CreateLogger();
 var builder = Host.CreateApplicationBuilder(args);
 WorkerServiceRegistration.ConfigureServices(builder);
 var host = builder.Build();
@@ -29,5 +31,6 @@ public static class WorkerServiceRegistration
         builder.Services.AddSingleton<IConnectionMultiplexer>(_=>ConnectionMultiplexer.Connect(multiplexerOptions));
         builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
         builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
+        builder.Services.AddSerilog();
     }
 }
