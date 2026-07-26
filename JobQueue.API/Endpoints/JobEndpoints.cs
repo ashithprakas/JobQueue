@@ -10,8 +10,12 @@ namespace JobQueue.API.Endpoints;
 public static class JobEndpoints
 {
      public static void MapJobEndpoints(this WebApplication app)
-    {
-        app.MapGet("/health", ()=>Results.Ok("Healthy"));
+     {
+         app.MapGet("/health", Task<IResult> () =>
+         {
+             var response = new GenericResponse() { Status = "Healthy" };
+             return Task.FromResult(Results.Ok(response));
+         });
         app.MapPost("/jobs", async (CreateJobRequest createJobRequest, IJobService jobService,IValidator<CreateJobRequest> validator) =>
         {
             var validationResult = await validator.ValidateAsync(createJobRequest);

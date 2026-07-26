@@ -22,12 +22,11 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
 var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
 multiplexerOptions.AbortOnConnectFail = false;
-builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(multiplexerOptions));
+builder.Services.AddSingleton<IConnectionMultiplexer>(_=>ConnectionMultiplexer.Connect(multiplexerOptions));
 builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
 builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
 
@@ -79,4 +78,5 @@ app.UseCors();
 app.MapSignalREndpoints();
 app.Run();
 
+public partial class Program {}
 

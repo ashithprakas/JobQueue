@@ -3,6 +3,7 @@
   <Project Path="JobQueue.Application/JobQueue.Application.csproj" />
   <Project Path="JobQueue.Core/JobQueue.Core.csproj" />
   <Project Path="JobQueue.Infrastructure/JobQueue.Infrastructure.csproj" />
+  <Project Path="JobQueue.Integration.Tests/JobQueue.Integration.Tests.csproj" />
   <Project Path="JobQueue.RetrySweepWorker/JobQueue.RetrySweepWorker.csproj" />
   <Project Path="JobQueue.Worker\JobQueue.Worker.csproj" />
   <Project Path="JobQueue.Application.Tests/JobQueue.Application.Tests.csproj" />

@@ -9,17 +9,25 @@ using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 var builder = Host.CreateApplicationBuilder(args);
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<IJobRepository, JobRepository>();
-builder.Services.AddScoped<IJobService, JobService>();
-builder.Services.AddHostedService<Worker>();
-var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
-multiplexerOptions.AbortOnConnectFail = false;
-builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(multiplexerOptions));
-builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
-builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
+WorkerServiceRegistration.ConfigureServices(builder);
 var host = builder.Build();
 host.Run();
+
+public static class WorkerServiceRegistration
+{
+    public static void ConfigureServices(HostApplicationBuilder builder)
+    {
+        
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        builder.Services.AddScoped<IJobRepository, JobRepository>();
+        builder.Services.AddScoped<IJobService, JobService>();
+        builder.Services.AddHostedService<Worker>();
+        var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
+        multiplexerOptions.AbortOnConnectFail = false;
+        builder.Services.AddSingleton<IConnectionMultiplexer>(_=>ConnectionMultiplexer.Connect(multiplexerOptions));
+        builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
+        builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
+    }
+}
