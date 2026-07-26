@@ -13,7 +13,7 @@ public class ContainerFixtures : IAsyncLifetime
 
     public RedisContainer RedisContainer { get; } =
         new RedisBuilder("redis:7.0").Build();
-    
+
     public async ValueTask InitializeAsync()
     {
         await Task.WhenAll(
@@ -21,7 +21,7 @@ public class ContainerFixtures : IAsyncLifetime
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlServer(SqlServerContainer.GetConnectionString()).Options;
-        
+
         await using var context = new AppDbContext(options);
         await context.Database.MigrateAsync();
     }

@@ -18,7 +18,7 @@ public class WebApplicationFixture(ContainerFixtures containers) : WebApplicatio
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(containers.SqlServerContainer.GetConnectionString()));
             services.RemoveAll<IConnectionMultiplexer>();
-            services.AddSingleton<IConnectionMultiplexer>(_ =>ConnectionMultiplexer.Connect(containers.RedisContainer.GetConnectionString()));
+            services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(containers.RedisContainer.GetConnectionString()));
         });
     }
 }

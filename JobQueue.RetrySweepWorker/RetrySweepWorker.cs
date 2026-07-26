@@ -3,7 +3,7 @@ using JobQueue.Core.Interfaces;
 
 namespace JobQueue.RetrySweepWorker;
 
-public class RetrySweepWorker(IServiceScopeFactory scopeFactory,IJobStreamService jobStreamService,ILogger<RetrySweepWorker>logger) : BackgroundService
+public class RetrySweepWorker(IServiceScopeFactory scopeFactory, IJobStreamService jobStreamService, ILogger<RetrySweepWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

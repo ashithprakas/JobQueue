@@ -6,7 +6,7 @@ using StackExchange.Redis;
 
 namespace JobQueue.Infrastructure.RedisRepository;
 
-public class JobStreamService(IConnectionMultiplexer redis,ILogger<IJobStreamService> logger) : IJobStreamService
+public class JobStreamService(IConnectionMultiplexer redis, ILogger<IJobStreamService> logger) : IJobStreamService
 {
     public Task AddJobToQueueAsync(string id)
     {
@@ -19,7 +19,7 @@ public class JobStreamService(IConnectionMultiplexer redis,ILogger<IJobStreamSer
         try
         {
             var db = redis.GetDatabase();
-            await  db.StreamCreateConsumerGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP, "0", createStream: true);
+            await db.StreamCreateConsumerGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP, "0", createStream: true);
         }
         catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
         {
@@ -45,6 +45,6 @@ public class JobStreamService(IConnectionMultiplexer redis,ILogger<IJobStreamSer
         return result;
     }
 
-    
-    
+
+
 }

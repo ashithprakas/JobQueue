@@ -6,7 +6,7 @@ namespace JobQueue.Infrastructure.Repositories;
 
 using Core.Interfaces;
 
-public class JobRepository(AppDbContext appDbContext) : IJobRepository 
+public class JobRepository(AppDbContext appDbContext) : IJobRepository
 {
     public async Task AddAsync(Job job)
     {
@@ -15,26 +15,26 @@ public class JobRepository(AppDbContext appDbContext) : IJobRepository
     }
 
     public async Task<Job?> GetJobByIdAsync(Guid id)
-    { 
-        return await appDbContext.Jobs.Where(job => job.Id == id ).AsNoTracking().FirstOrDefaultAsync();
+    {
+        return await appDbContext.Jobs.Where(job => job.Id == id).AsNoTracking().FirstOrDefaultAsync();
     }
-    
+
 
     public async Task UpdateAsync(Job job)
     {
-         await appDbContext.Jobs
-             .Where(data => data.Id == job.Id)
-             .ExecuteUpdateAsync(setter => setter
-                 .SetProperty(u=>u.Status,job.Status)
-                 .SetProperty(u=>u.Attempts,job.Attempts)
-                 .SetProperty(u=>u.UpdatedAt,job.UpdatedAt)
-                 .SetProperty(u=>u.ErrorMessage,job.ErrorMessage)
-                 .SetProperty(u=>u.Payload,job.Payload)
-                 .SetProperty(u=>u.RetryAt,job.RetryAt));
+        await appDbContext.Jobs
+            .Where(data => data.Id == job.Id)
+            .ExecuteUpdateAsync(setter => setter
+                .SetProperty(u => u.Status, job.Status)
+                .SetProperty(u => u.Attempts, job.Attempts)
+                .SetProperty(u => u.UpdatedAt, job.UpdatedAt)
+                .SetProperty(u => u.ErrorMessage, job.ErrorMessage)
+                .SetProperty(u => u.Payload, job.Payload)
+                .SetProperty(u => u.RetryAt, job.RetryAt));
     }
 
     public async Task<List<Job>> GetJobsToRetryAsync(int count = 1)
     {
-        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending ).Where(job=> job.RetryAt<DateTime.UtcNow).Take(count).ToListAsync();
+        return await appDbContext.Jobs.Where(job => job.Status == JobStatus.Pending).Where(job => job.RetryAt < DateTime.UtcNow).Take(count).ToListAsync();
     }
 }

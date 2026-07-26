@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace JobQueue.Application.Services;
 
-public class JobService(IJobRepository jobRepository , IEventPublisher eventPublisher, IJobStreamService redisRepository,ILogger<IJobService> logger) : IJobService
+public class JobService(IJobRepository jobRepository, IEventPublisher eventPublisher, IJobStreamService redisRepository, ILogger<IJobService> logger) : IJobService
 {
-    public async Task<Job> CreateJob(Guid Id,string payload)
+    public async Task<Job> CreateJob(Guid Id, string payload)
     {
         var job = new Job()
         {
@@ -20,11 +20,11 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
             UpdatedAt = DateTime.UtcNow,
             Attempts = 0
         };
-        
+
         await jobRepository.AddAsync(job);
         await redisRepository.AddJobToQueueAsync(job.Id.ToString());
         return job;
-    } 
+    }
 
     public async Task<JobStatus> GetJobStatus(Guid id)
     {
@@ -34,19 +34,15 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
 
     public async Task ProcessJob(Guid id)
     {
-        var job = await jobRepository.GetJobByIdAsync(id);
-        if (job == null)
-        {
-            throw new NotFoundException($"Job with id {id} not found");
-        }
+        var job = await jobRepository.GetJobByIdAsync(id) ?? throw new NotFoundException($"Job with id {id} not found");
         job.Status = JobStatus.Processing;
         job.UpdatedAt = DateTime.UtcNow;
-        job.Attempts +=1;
+        job.Attempts += 1;
         try
         {
             await jobRepository.UpdateAsync(job);
             await eventPublisher.PublishJobStatusUpdate(job.Id, job.Status);
-    
+
             job.Status = JobStatus.Completed;
             job.UpdatedAt = DateTime.UtcNow;
             await jobRepository.UpdateAsync(job);
@@ -55,7 +51,7 @@ public class JobService(IJobRepository jobRepository , IEventPublisher eventPubl
         {
             job.Status = job.Attempts >= JobConstants.MaxAttempts ? JobStatus.DeadLetter : JobStatus.Pending;
             job.UpdatedAt = DateTime.UtcNow;
-            job.RetryAt = DateTime.UtcNow + new TimeSpan(0,5,Random.Shared.Next(0, 60)) ;
+            job.RetryAt = DateTime.UtcNow + new TimeSpan(0, 5, Random.Shared.Next(0, 60));
             job.ErrorMessage = e.Message;
             try
             {

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
 
-Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning).Enrich.FromLogContext().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").WriteTo.File("Logs/sweeper-logs.txt",outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").CreateLogger();
+Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning).Enrich.FromLogContext().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").WriteTo.File("Logs/sweeper-logs.txt", outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").CreateLogger();
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<RetrySweepWorker>();
 

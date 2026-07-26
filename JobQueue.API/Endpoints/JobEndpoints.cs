@@ -23,7 +23,7 @@ public static class JobEndpoints
                 ILogger<Program> logger) =>
             {
                 using (logger.BeginScope(new Dictionary<string, object>
-                           { ["CorrelationId"] = createJobRequest.Id.ToString() }))
+                { ["CorrelationId"] = createJobRequest.Id.ToString() }))
                 {
                     var validationResult = await validator.ValidateAsync(createJobRequest);
                     if (!validationResult.IsValid)

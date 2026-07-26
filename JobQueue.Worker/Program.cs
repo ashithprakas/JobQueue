@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
 
-Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning).Enrich.FromLogContext().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").WriteTo.File("Logs/worker-logs.txt",outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").CreateLogger();
+Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning).Enrich.FromLogContext().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").WriteTo.File("Logs/worker-logs.txt", outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}").CreateLogger();
 var builder = Host.CreateApplicationBuilder(args);
 WorkerServiceRegistration.ConfigureServices(builder);
 var host = builder.Build();
@@ -19,7 +19,7 @@ public static class WorkerServiceRegistration
 {
     public static void ConfigureServices(HostApplicationBuilder builder)
     {
-        
+
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -28,7 +28,7 @@ public static class WorkerServiceRegistration
         builder.Services.AddHostedService<Worker>();
         var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
         multiplexerOptions.AbortOnConnectFail = false;
-        builder.Services.AddSingleton<IConnectionMultiplexer>(_=>ConnectionMultiplexer.Connect(multiplexerOptions));
+        builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(multiplexerOptions));
         builder.Services.AddSingleton<IEventPublisher, RedisEventPublisher>();
         builder.Services.AddSingleton<IJobStreamService, JobStreamService>();
         builder.Services.AddSerilog();

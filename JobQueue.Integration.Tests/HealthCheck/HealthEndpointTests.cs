@@ -19,15 +19,15 @@ public class HealthEndpointTests : IDisposable
         _client.Dispose();
         _factory.Dispose();
     }
-    
+
     [Fact]
-    public async Task HealthEndpoint_ReturnsHealthyStatus ()
+    public async Task HealthEndpoint_ReturnsHealthyStatus()
     {
         var response = await _client.GetAsync("/health", TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadFromJsonAsync<GenericResponse>(cancellationToken: TestContext.Current.CancellationToken);
         var testResponse = new GenericResponse() { Status = "Healthy" };
         Assert.NotNull(content);
-        Assert.Equal(testResponse.Status,content.Status);
+        Assert.Equal(testResponse.Status, content.Status);
     }
 }
