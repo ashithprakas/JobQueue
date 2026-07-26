@@ -1,5 +1,4 @@
 using FluentValidation;
-using FluentValidation.Results;
 using JobQueue.API.DTOs;
 using JobQueue.Core.Interfaces;
 using Microsoft.Data.SqlClient;

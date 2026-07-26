@@ -1,7 +1,6 @@
 using JobQueue.Core.Constants;
 using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
-using StackExchange.Redis;
 
 namespace JobQueue.Worker;
 

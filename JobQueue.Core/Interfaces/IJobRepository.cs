@@ -1,4 +1,3 @@
-using JobQueue.Core.Enums;
 using JobQueue.Core.Models;
 
 namespace JobQueue.Core.Interfaces;
