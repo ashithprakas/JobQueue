@@ -1,8 +1,10 @@
 using FluentValidation;
 using JobQueue.API.DTOs;
 using JobQueue.Core.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace JobQueue.API.Endpoints;
 
@@ -10,19 +12,39 @@ public static class JobEndpoints
 {
     public static void MapJobEndpoints(this WebApplication app)
     {
-        app.MapGet("/health", Task<IResult> (ILogger<Program> logger) =>
+        var healthCheckEndpointGroup = app.MapGroup("/health").WithTags("Health Checks");
+        healthCheckEndpointGroup.MapGet("/live", (ILogger<Program> logger) =>
         {
             var response = new GenericResponse() { Status = "Healthy" };
             logger.LogInformation(response.ToString());
             return Task.FromResult(Results.Ok(response));
         });
+        healthCheckEndpointGroup.MapGet("/ready",
+            async (HealthCheckService healthCheckService, ILogger<Program> logger) =>
+            {
+                var report = await healthCheckService.CheckHealthAsync(check => check.Tags.Contains("ready"));
+
+                var response = new GenericResponse()
+                {
+                    Status = report.Status == HealthStatus.Healthy ? "Healthy" : "Unhealthy",
+                };
+
+                if (report.Status != HealthStatus.Healthy)
+                {
+                    logger.LogWarning("Readiness check failed: {Report}", report.Entries);
+                }
+
+                return report.Status == HealthStatus.Healthy
+                    ? Results.Ok(response)
+                    : Results.Json(response, statusCode: StatusCodes.Status503ServiceUnavailable);
+            });
 
         app.MapPost("/jobs",
             async (CreateJobRequest createJobRequest, IJobService jobService, IValidator<CreateJobRequest> validator,
                 ILogger<Program> logger) =>
             {
                 using (logger.BeginScope(new Dictionary<string, object>
-                { ["CorrelationId"] = createJobRequest.Id.ToString() }))
+                           { ["CorrelationId"] = createJobRequest.Id.ToString() }))
                 {
                     var validationResult = await validator.ValidateAsync(createJobRequest);
                     if (!validationResult.IsValid)

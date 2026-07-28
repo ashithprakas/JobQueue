@@ -7,23 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JobQueue.Core\JobQueue.Core.csproj" />
+    <ProjectReference Include="..\JobQueue.Core\JobQueue.Core.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
-    <PackageReference Include="StackExchange.Redis" Version="2.13.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9"/>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.10"/>
+    <PackageReference Include="StackExchange.Redis" Version="2.13.17"/>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <Folder Include="Migrations\"/>
   </ItemGroup>
 
 </Project>

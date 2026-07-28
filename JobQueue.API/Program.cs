@@ -9,6 +9,7 @@ using FluentValidation;
 using JobQueue.API.DTOs;
 using JobQueue.API.Services;
 using JobQueue.Core.Exceptions;
+using JobQueue.Infrastructure.HealthChecks;
 using JobQueue.Infrastructure.Messaging;
 using JobQueue.Infrastructure.RedisRepository;
 using Microsoft.AspNetCore.Diagnostics;
@@ -19,8 +20,10 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File("Logs/api-logs.txt", outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File("Logs/api-logs.txt",
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,15 +48,18 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+builder.Services.AddHealthChecks()
+    .AddCheck<SqlServerHealthCheck>("sql-server", tags: ["ready"])
+    .AddCheck<RedisServerHealthChecks>("redis", tags: ["ready"]);
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins("null", "http://localhost", "http://127.0.0.1:5500")
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -94,4 +100,6 @@ app.MapSignalREndpoints();
 
 app.Run();
 
-public partial class Program { }
+public partial class Program
+{
+}
