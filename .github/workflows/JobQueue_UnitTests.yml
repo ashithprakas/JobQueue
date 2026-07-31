@@ -6,18 +6,33 @@ on:
     branches: ["master"]
 
 jobs:
-  build_and_test:
+  check_lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: prebuild_checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET 10
+      - name: Setting up .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
 
-      - name: Cache NuGet Packages
+      - name: Code Lint Check
+        run: dotnet format --verify-no-changes
+
+  build_and_test:
+    runs-on: ubuntu-latest
+    needs: check_lint
+    steps:
+      - name: prebuild_checkout
+        uses: actions/checkout@v4
+
+      - name: Setting up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Feching Cached NuGet Packages
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
