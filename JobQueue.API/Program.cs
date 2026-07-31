@@ -39,7 +39,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
 
-var multiplexerOptions = ConfigurationOptions.Parse("localhost:6379");
+var multiplexerOptions =
+    ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis") ??
+                               "localhost:6379");
 multiplexerOptions.AbortOnConnectFail = false;
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(multiplexerOptions));
 builder.Services.AddSingleton<IJobStreamService, JobStreamService>();

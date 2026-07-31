@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-JobQueue.RetrySweepWorker-b624730e-ed6d-4ce0-ae63-0e1199f3b3d0</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,5 +24,11 @@
   <ItemGroup>
     <ProjectReference Include="..\JobQueue.Core\JobQueue.Core.csproj"/>
     <ProjectReference Include="..\JobQueue.Infrastructure\JobQueue.Infrastructure.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 </Project>

@@ -1,0 +1,77 @@
+﻿services:
+  Sql_Server:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: Sql_Server
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/1433' || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+
+  Redis_Server:
+    image: redis:latest
+    container_name: Redis_Server
+    ports:
+      - "6379:6379"
+
+  db-migrator:
+    build:
+      context: .
+      dockerfile: JobQueue.Migrator/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=Sql_Server,1433;Database=JobQueue;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+    depends_on:
+      Sql_Server:
+        condition: service_healthy
+
+  api:
+    container_name: jobqueue-api
+    build:
+      context: .
+      dockerfile: JobQueue.API/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      Redis_Server:
+        condition: service_started
+      db-migrator:
+        condition: service_completed_successfully
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=Sql_Server,1433;Database=JobQueue;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ConnectionStrings__HealthCheckConnection=Server=Sql_Server,1433;Database=JobQueue;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;Connect Timeout=3
+      - ConnectionStrings__Redis=Redis_Server:6379
+
+  worker:
+    container_name: jobqueue_worker
+    build:
+      context: .
+      dockerfile: JobQueue.Worker/Dockerfile
+    depends_on:
+      Redis_Server:
+        condition: service_started
+      db-migrator:
+        condition: service_completed_successfully
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=Sql_Server,1433;Database=JobQueue;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ConnectionStrings__Redis=Redis_Server:6379
+
+  retry_sweep:
+    container_name: jobqueue_retry_sweep
+    build:
+      context: .
+      dockerfile: JobQueue.RetrySweepWorker/Dockerfile
+    depends_on:
+      Redis_Server:
+        condition: service_started
+      db-migrator:
+        condition: service_completed_successfully
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=Sql_Server,1433;Database=JobQueue;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ConnectionStrings__Redis=Redis_Server:6379

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.yaml" />
+  </Folder>
   <Project Path="JobQueue.API/JobQueue.API.csproj" />
   <Project Path="JobQueue.Application/JobQueue.Application.csproj" />
   <Project Path="JobQueue.Core/JobQueue.Core.csproj" />

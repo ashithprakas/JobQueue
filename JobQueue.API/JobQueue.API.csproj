@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>2f623ae1-a929-4cdc-9c75-6959d4628912</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,12 @@
     <ProjectReference Include="..\JobQueue.Application\JobQueue.Application.csproj"/>
     <ProjectReference Include="..\JobQueue.Core\JobQueue.Core.csproj"/>
     <ProjectReference Include="..\JobQueue.Infrastructure\JobQueue.Infrastructure.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
