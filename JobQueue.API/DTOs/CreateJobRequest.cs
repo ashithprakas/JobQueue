@@ -8,7 +8,7 @@ using FluentValidation;
 public class CreateJobRequest
 {
     public Guid Id { get; set; }
-    public string Payload { get; set; }
+    public string? Payload { get; set; }
 }
 
 public class CreateJobRequestValidator : AbstractValidator<CreateJobRequest>
@@ -19,7 +19,7 @@ public class CreateJobRequestValidator : AbstractValidator<CreateJobRequest>
         RuleFor(x => x.Payload)
             .Cascade(CascadeMode.Stop) // Prevents next rules from running if NotNull/NotEmpty fails
             .NotNull().NotEmpty().WithMessage("Payload cannot be empty")
-            .Must(payload => Encoding.UTF8.GetByteCount(payload) <= JobConstants.MaxPayloadLength).WithMessage("Payload cannot exceed 256KB");
+            .Must(payload => Encoding.UTF8.GetByteCount(payload!) <= JobConstants.MaxPayloadLength).WithMessage("Payload cannot exceed 256KB"); // safe: Cascade(Stop) above guarantees NotNull already passed before this rule runs
 
     }
 }

@@ -10,6 +10,6 @@ public class RedisEventPublisher(IConnectionMultiplexer redis) : IEventPublisher
     {
         var subscriber = redis.GetSubscriber();
         var message = $"{jobId}:{status}";
-        await subscriber.PublishAsync("job-status", message);
+        await subscriber.PublishAsync(RedisChannel.Literal("job-status"), message);
     }
 }

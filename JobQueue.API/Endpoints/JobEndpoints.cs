@@ -60,7 +60,8 @@ public static class JobEndpoints
 
                     try
                     {
-                        var job = await jobService.CreateJob(createJobRequest.Id, createJobRequest.Payload);
+                        // Payload! is safe: the validation-failed branch above already returned for a null/empty Payload
+                        var job = await jobService.CreateJob(createJobRequest.Id, createJobRequest.Payload!);
                         activity?.AddTag("Outcome", "Created");
                         return Results.Created($"/jobs/{job.Id}", job);
                     }

@@ -105,6 +105,6 @@ public class JobService(IJobRepository jobRepository, IEventPublisher eventPubli
 
     public async Task<Job> GetJobById(Guid id)
     {
-        return await jobRepository.GetJobByIdAsync(id);
+        return await jobRepository.GetJobByIdAsync(id) ?? throw new NotFoundException($"Job with id {id} not found");
     }
 }
