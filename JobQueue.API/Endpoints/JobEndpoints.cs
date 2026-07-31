@@ -1,7 +1,8 @@
+using System.Diagnostics;
 using FluentValidation;
 using JobQueue.API.DTOs;
 using JobQueue.Core.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
+using JobQueue.Core.Telemetry.Config;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -46,9 +47,13 @@ public static class JobEndpoints
                 using (logger.BeginScope(new Dictionary<string, object>
                            { ["CorrelationId"] = createJobRequest.Id.ToString() }))
                 {
+                    using var activity = DiagnosticConfig.ActivitySource.StartActivity("CreateJob");
+                    activity?.AddTag("JobId", createJobRequest.Id.ToString());
+
                     var validationResult = await validator.ValidateAsync(createJobRequest);
                     if (!validationResult.IsValid)
                     {
+                        activity?.AddTag("Outcome", "ValidationFailed");
                         logger.LogInformation("Validation Failed : {Errors}", validationResult.Errors);
                         return Results.ValidationProblem(validationResult.ToDictionary());
                     }
@@ -56,17 +61,21 @@ public static class JobEndpoints
                     try
                     {
                         var job = await jobService.CreateJob(createJobRequest.Id, createJobRequest.Payload);
+                        activity?.AddTag("Outcome", "Created");
                         return Results.Created($"/jobs/{job.Id}", job);
                     }
                     catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
                     {
                         var id = createJobRequest.Id;
                         var job = await jobService.GetJobById(id);
+                        activity?.AddTag("Outcome", "Conflict");
                         logger.LogError(ex, "Job Id Already Exists");
                         return Results.Conflict(job);
                     }
                     catch (Exception ex)
                     {
+                        activity?.AddTag("Outcome", "Error");
+                        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                         logger.LogError(ex, "Error : ");
                         return Results.Problem(ex.Message);
                     }
@@ -76,7 +85,10 @@ public static class JobEndpoints
         {
             using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = id.ToString() }))
             {
+                using var activity = DiagnosticConfig.ActivitySource.StartActivity("GetJobStatus");
+                activity?.AddTag("JobId", id.ToString());
                 var status = await jobService.GetJobStatus(id);
+                activity?.AddTag("JobStatus", status.ToString());
                 logger.LogInformation("Returning Job Status as {status} ", status);
                 return Results.Ok(status);
             }

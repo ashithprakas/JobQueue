@@ -9,10 +9,14 @@ using FluentValidation;
 using JobQueue.API.DTOs;
 using JobQueue.API.Services;
 using JobQueue.Core.Exceptions;
+using JobQueue.Core.Telemetry.Config;
 using JobQueue.Infrastructure.HealthChecks;
 using JobQueue.Infrastructure.Messaging;
 using JobQueue.Infrastructure.RedisRepository;
 using Microsoft.AspNetCore.Diagnostics;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using StackExchange.Redis;
 
@@ -62,6 +66,21 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
+const string serviceName = "JobQueue.API";
+const string serviceVersion = "v1";
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName, serviceVersion))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSource(DiagnosticConfig.ActivitySource.Name)
+        .AddOtlpExporter(options => { options.Endpoint = new Uri("http://localhost:4317"); }))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter());
 
 builder.Services.AddSignalR();
 builder.Services.AddSerilog();

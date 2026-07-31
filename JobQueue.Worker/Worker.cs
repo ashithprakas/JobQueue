@@ -1,10 +1,13 @@
+using System.Diagnostics;
 using JobQueue.Core.Constants;
 using JobQueue.Core.Interfaces;
 using JobQueue.Core.Models;
+using JobQueue.Core.Telemetry.Config;
 
 namespace JobQueue.Worker;
 
-public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStreamService, ILogger<Worker> logger) : BackgroundService
+public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStreamService, ILogger<Worker> logger)
+    : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -14,14 +17,18 @@ public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStre
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            using var activity = DiagnosticConfig.ActivitySource.StartActivity("ProcessJobBatch");
             using var scope = scopeFactory.CreateScope();
             var jobService = scope.ServiceProvider.GetRequiredService<IJobService>();
             try
             {
                 jobStream = await jobStreamService.ReadJobsAsync(consumerName, JobConstants.JobProcessCount);
+                activity?.AddTag("JobProcessCount", jobStream.Count);
             }
             catch (Exception ex)
             {
+                activity?.AddTag("JobProcessError", ex.Message);
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                 logger.LogError(ex, "Failed to read from job stream");
                 await Task.Delay(5000, stoppingToken);
                 continue;
@@ -37,13 +44,17 @@ public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStre
                     {
                         await jobService.ProcessJob(job.JobId);
                         await jobStreamService.AcknowledgeAsync(job.EntryId);
+                        activity?.AddTag("AcknowledgedEntryId", job.EntryId);
                     }
                     catch (Exception ex)
                     {
+                        activity?.AddTag("JobError", ex.Message);
+                        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                         logger.LogError(ex, "Error processing job");
                     }
                 }
             }
+
             await Task.Delay(5000, stoppingToken);
         }
     }
