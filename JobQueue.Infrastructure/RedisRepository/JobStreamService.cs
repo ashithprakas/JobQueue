@@ -11,7 +11,13 @@ public class JobStreamService(IConnectionMultiplexer redis, ILogger<IJobStreamSe
     public Task AddJobToQueueAsync(string id)
     {
         var db = redis.GetDatabase();
-        return db.StreamAddAsync(JobStreamConstants.JOBSTREAMKEY, "jobId", id);
+        var traceParent = System.Diagnostics.Activity.Current?.Id;
+        var entry = new NameValueEntry[]
+        {
+            new NameValueEntry(JobStreamConstants.JOBIDKEY, id),
+            new NameValueEntry(JobStreamConstants.JOBTRACEKEY, traceParent),
+        };
+        return db.StreamAddAsync(JobStreamConstants.JOBSTREAMKEY, entry);
     }
 
     public async Task EnsureConsumerGroupAsync()
@@ -19,7 +25,8 @@ public class JobStreamService(IConnectionMultiplexer redis, ILogger<IJobStreamSe
         try
         {
             var db = redis.GetDatabase();
-            await db.StreamCreateConsumerGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP, "0", createStream: true);
+            await db.StreamCreateConsumerGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP,
+                "0", createStream: true);
         }
         catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
         {
@@ -36,15 +43,16 @@ public class JobStreamService(IConnectionMultiplexer redis, ILogger<IJobStreamSe
         var db = redis.GetDatabase();
         return db.StreamAcknowledgeAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP, id);
     }
+
     public async Task<List<StreamJobEntry>> ReadJobsAsync(string consumerName, int count)
     {
         var db = redis.GetDatabase();
-        var entries = await db.StreamReadGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP, consumerName, ">", count);
-        var result = (from entry in entries let jobId = Guid.Parse(entry["jobId"].ToString()) select new StreamJobEntry(entry.Id.ToString(), jobId)).ToList();
-
+        var entries = await db.StreamReadGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP,
+            consumerName, ">", count);
+        var result = (from entry in entries
+            let jobId = Guid.Parse(entry[JobStreamConstants.JOBIDKEY].ToString())
+            let traceId = entry[JobStreamConstants.JOBTRACEKEY].ToString()
+            select new StreamJobEntry(entry.Id.ToString(), jobId, traceId)).ToList();
         return result;
     }
-
-
-
 }

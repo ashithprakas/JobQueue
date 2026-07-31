@@ -44,7 +44,8 @@ builder.Services.AddOpenTelemetry()
             serviceVersion: serviceVersion))
     .WithTracing(tracing => tracing
         .AddSource(DiagnosticConfig.ActivitySource.Name)
-        .AddOtlpExporter(options => { options.Endpoint = new Uri("http://localhost:4317"); }))
+        .AddOtlpExporter(options => { options.Endpoint = new Uri("http://localhost:4317"); })
+        .AddConsoleExporter())
     .WithMetrics(metrics => metrics
         .AddRuntimeInstrumentation()
         .AddOtlpExporter(options => { options.Endpoint = new Uri("http://localhost:4317"); }));

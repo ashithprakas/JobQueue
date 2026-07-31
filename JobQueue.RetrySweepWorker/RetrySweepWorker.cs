@@ -24,8 +24,10 @@ public class RetrySweepWorker(
                 activity?.SetTag("RetryJobCount", eligibleJobs.Count);
                 foreach (var job in eligibleJobs)
                 {
+                    using var jobActivity = DiagnosticConfig.ActivitySource.StartActivity("AnnounceRetryJob");
+                    jobActivity?.AddTag("JobId", job.Id.ToString());
                     await jobStreamService.AddJobToQueueAsync(job.Id.ToString());
-                    activity?.AddTag("JobIdAddedToQueue", job.Id);
+                    jobActivity?.AddTag("JobIdAddedToQueue", job.Id);
                 }
 
                 await Task.Delay(5000, stoppingToken);

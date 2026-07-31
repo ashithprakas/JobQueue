@@ -40,16 +40,25 @@ public class Worker(IServiceScopeFactory scopeFactory, IJobStreamService jobStre
                 {
                     logger.LogInformation("Processing Job");
 
+                    ActivityContext parentContext = default;
+                    var hasParent = !string.IsNullOrEmpty(job.TraceId) &&
+                                    ActivityContext.TryParse(job.TraceId, null, out parentContext);
+                    using var jobActivity = hasParent
+                        ? DiagnosticConfig.ActivitySource.StartActivity("ProcessJob", ActivityKind.Consumer,
+                            parentContext)
+                        : DiagnosticConfig.ActivitySource.StartActivity("ProcessJob");
+                    jobActivity?.AddTag("JobId", job.JobId.ToString());
+
                     try
                     {
                         await jobService.ProcessJob(job.JobId);
                         await jobStreamService.AcknowledgeAsync(job.EntryId);
-                        activity?.AddTag("AcknowledgedEntryId", job.EntryId);
+                        jobActivity?.AddTag("AcknowledgedEntryId", job.EntryId);
                     }
                     catch (Exception ex)
                     {
-                        activity?.AddTag("JobError", ex.Message);
-                        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                        jobActivity?.AddTag("JobError", ex.Message);
+                        jobActivity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                         logger.LogError(ex, "Error processing job");
                     }
                 }

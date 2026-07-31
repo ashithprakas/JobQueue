@@ -1,0 +1,36 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317 # Your .NET app connects here via gRPC
+      http:
+        endpoint: 0.0.0.0:4318 # Alternative HTTP connection endpoint
+
+processors:
+  batch:
+    send_batch_size: 8192
+    timeout: 1s
+    send_batch_max_size: 10240
+
+exporters:
+  debug:
+    verbosity: detailed # Prints full trace, metric, and log data to docker logs
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+  telemetry:
+    logs:
+      level: "info"
