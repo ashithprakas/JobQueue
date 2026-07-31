@@ -13,7 +13,7 @@ public class RedisSubscriberService(IConnectionMultiplexer redis, IHubContext<Jo
         {
             try
             {
-                await subscriber.SubscribeAsync("job-status", async (channel, message) =>
+                await subscriber.SubscribeAsync(RedisChannel.Literal("job-status"), async (channel, message) =>
                 {
                     var parts = message.ToString().Split(':');
                     if (parts.Length == 2)

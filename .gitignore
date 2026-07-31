@@ -432,4 +432,5 @@ FodyWeavers.xsd
 *.db-shm
 *.db-wal
 .idea/
+.DS_Store
 identifier.sqlite
