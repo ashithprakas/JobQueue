@@ -45,7 +45,7 @@ public static class JobEndpoints
                 ILogger<Program> logger) =>
             {
                 using (logger.BeginScope(new Dictionary<string, object>
-                           { ["CorrelationId"] = createJobRequest.Id.ToString() }))
+                { ["CorrelationId"] = createJobRequest.Id.ToString() }))
                 {
                     using var activity = DiagnosticConfig.ActivitySource.StartActivity("CreateJob");
                     activity?.AddTag("JobId", createJobRequest.Id.ToString());

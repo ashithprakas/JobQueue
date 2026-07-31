@@ -50,9 +50,9 @@ public class JobStreamService(IConnectionMultiplexer redis, ILogger<IJobStreamSe
         var entries = await db.StreamReadGroupAsync(JobStreamConstants.JOBSTREAMKEY, JobStreamConstants.JOBWORKERGROUP,
             consumerName, ">", count);
         var result = (from entry in entries
-            let jobId = Guid.Parse(entry[JobStreamConstants.JOBIDKEY].ToString())
-            let traceId = entry[JobStreamConstants.JOBTRACEKEY].ToString()
-            select new StreamJobEntry(entry.Id.ToString(), jobId, traceId)).ToList();
+                      let jobId = Guid.Parse(entry[JobStreamConstants.JOBIDKEY].ToString())
+                      let traceId = entry[JobStreamConstants.JOBTRACEKEY].ToString()
+                      select new StreamJobEntry(entry.Id.ToString(), jobId, traceId)).ToList();
         return result;
     }
 }
