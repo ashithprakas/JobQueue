@@ -11,7 +11,10 @@ RUN dotnet restore "JobQueue.Infrastructure/JobQueue.Infrastructure.csproj"
 
 COPY . .
 WORKDIR /src/JobQueue.Infrastructure
-RUN dotnet ef migrations bundle -o efbundle --self-contained -r linux-arm64
+#For Windows and Azure
+RUN dotnet ef migrations bundle -o efbundle --self-contained -r linux-x64
+#For Mac
+#RUN dotnet ef migrations bundle -o efbundle --self-contained -r linux-arm64
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0 AS final
 WORKDIR /app
